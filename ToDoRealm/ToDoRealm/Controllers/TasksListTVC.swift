@@ -12,15 +12,17 @@ class TasksListTVC: UITableViewController {
 
     var tasksLists: Results<TaskList>!
     private var ascendingSorting = true
+    var notificationToken: NotificationToken?
 
     @IBOutlet weak var segmentedControl: UISegmentedControl!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tasksLists = realm.objects(TaskList.self).sorted(byKeyPath: "name")
-        let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(acAddandUpdatesTL))
+        tasksLists = realm.objects(TaskList.self)
+        let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(acAddandUpdatesTLs))
                  self.navigationItem.setRightBarButtonItems([add, editButtonItem], animated: true)
+        notification()
     }
 
     @IBAction func sortingSControl(_ sender: UISegmentedControl) {
@@ -43,81 +45,124 @@ class TasksListTVC: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         let tasksList = tasksLists[indexPath.row]
-        cell.textLabel?.text = tasksList.name
-        cell.detailTextLabel?.text = String(tasksList.tasks.count)
+        cell.configure(with: tasksList)
         return cell
     }
 
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let currentList = tasksLists[indexPath.row]
+        
+        let deleteContext = UIContextualAction(style: .destructive, title: "Delete") { _, _, _ in
+            StorageManager.deleteList(tasksList: currentList)
             tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        }
+        
+        let editContext = UIContextualAction(style: .destructive, title: "Edit") { _, _, _ in
+            self.acAddandUpdatesTL(currentList) {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        }
+        
+        let doneContext = UIContextualAction(style: .destructive, title: "Done") { _, _, _ in
+            StorageManager.doneList(tasksList: currentList) {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        }
+        
+        editContext.backgroundColor = .blue
+        doneContext.backgroundColor = .green
+        
+        let swipeAction = UISwipeActionsConfiguration(actions: [deleteContext, editContext, doneContext])
+        
+        return swipeAction
     }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
+    
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if let indexPath = tableView.indexPathForSelectedRow {
+            let tasksList = tasksLists[indexPath.row]
+            let tasksTVC = segue.destination as! TaskTVC
+            tasksTVC.currentTasksList = tasksList
+        }
     }
-    */
+    
+    @objc private func acAddandUpdatesTLs() {
+        acAddandUpdatesTL {
+            print("")
+        }
+    }
 
-    @objc private func acAddandUpdatesTL() {
-        let title = "New List"
+    private func acAddandUpdatesTL(_ tasksList: TaskList? = nil, complition: @escaping () -> ()) {
+        let title = tasksList == nil ? "New List" : "Edit List"
         let massege = "Please insert list name"
-        let doneBtnName = "Save"
+        let doneBtnName = tasksList == nil ? "Save" : "Update"
 
         let alertController = UIAlertController(title: title, message: massege, preferredStyle: .alert)
 
         var alertTextField: UITextField!
         alertController.addTextField { textField in
             alertTextField = textField
+        if let listName = tasksList {
+            alertTextField.text = listName.name
+        }
             alertTextField.placeholder = "List Name"
         }
 
         let saveActn = UIAlertAction(title: doneBtnName, style: .default) { _ in
             guard let newList = alertTextField.text, !newList.isEmpty else { return }
+            if let tasksList = tasksList {
+                StorageManager.editList(tasksList: tasksList, newListName: newList, comlition: complition)
+            } else {
             let tasksList = TaskList()
             tasksList.name = newList
-
+            
             StorageManager.saveTaskList(tasksList: tasksList)
             self.tableView.insertRows(at: [IndexPath(row: self.tasksLists.count - 1, section: 0)], with: .fade)
+            }
         }
         let cancelActn = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(saveActn)
         alertController.addAction(cancelActn)
 
         present(alertController, animated: true)
+    }
+    
+    private func notification() {
+        notificationToken = tasksLists.observe { change in
+            switch change {
+            case .initial(_):
+                print("initial element")
+            case .update(_, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                print("deletions\(deletions)")
+                      print("insertions\(insertions)")
+                      print("modifications\(modifications)")
+                
+                if !modifications.isEmpty {
+                    var indexPathArray = [IndexPath]()
+                    for row in modifications {
+                        indexPathArray.append(IndexPath(row: row, section: 0))
+                    }
+                    self.tableView.reloadRows(at: indexPathArray, with: .fade)
+                }
+                
+                if !deletions.isEmpty {
+                    var indexPathArray = [IndexPath]()
+                    for row in deletions {
+                        indexPathArray.append(IndexPath(row: row, section: 0))
+                    }
+                    self.tableView.deleteRows(at: indexPathArray, with: .fade)
+                }
+                if !insertions.isEmpty {
+                    var indexPathArray = [IndexPath]()
+                    for row in insertions {
+                        indexPathArray.append(IndexPath(row: row, section: 0))
+                    }
+                    self.tableView.insertRows(at: indexPathArray, with: .fade)
+                }
+            case .error(let error):
+                print("error\(error)")
+            }
+        }
     }
 }

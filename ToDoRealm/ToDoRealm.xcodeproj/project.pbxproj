@@ -19,6 +19,7 @@
 		7F28952227DF9D9600A1067C /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F28952127DF9D9600A1067C /* Task.swift */; };
 		7F28952427DF9FE200A1067C /* TaskList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F28952327DF9FE200A1067C /* TaskList.swift */; };
 		7F28952727DFA06E00A1067C /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F28952627DFA06E00A1067C /* StorageManager.swift */; };
+		7F31BE6E27E1EC5800B26121 /* UITableViewCellExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F31BE6D27E1EC5800B26121 /* UITableViewCellExt.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		7F28952127DF9D9600A1067C /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		7F28952327DF9FE200A1067C /* TaskList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskList.swift; sourceTree = "<group>"; };
 		7F28952627DFA06E00A1067C /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		7F31BE6D27E1EC5800B26121 /* UITableViewCellExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCellExt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				7F28952027DF9D7900A1067C /* Model */,
 				7F28951927DF9CB400A1067C /* Views */,
 				7F28951B27DF9CCF00A1067C /* Controllers */,
+				7F31BE6C27E1EC2400B26121 /* Extension */,
 				7F28951A27DF9CBE00A1067C /* App */,
 				7F28950927DF97F700A1067C /* Assets.xcassets */,
 				7F28950E27DF97F700A1067C /* Info.plist */,
@@ -121,6 +124,14 @@
 				7F28952627DFA06E00A1067C /* StorageManager.swift */,
 			);
 			path = Manager;
+			sourceTree = "<group>";
+		};
+		7F31BE6C27E1EC2400B26121 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				7F31BE6D27E1EC5800B26121 /* UITableViewCellExt.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,6 +217,7 @@
 				7F28951D27DF9CF400A1067C /* TasksListTVC.swift in Sources */,
 				7F28952727DFA06E00A1067C /* StorageManager.swift in Sources */,
 				7F28952227DF9D9600A1067C /* Task.swift in Sources */,
+				7F31BE6E27E1EC5800B26121 /* UITableViewCellExt.swift in Sources */,
 				7F28950127DF97F500A1067C /* AppDelegate.swift in Sources */,
 				7F28950327DF97F500A1067C /* SceneDelegate.swift in Sources */,
 			);

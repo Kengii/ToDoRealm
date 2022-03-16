@@ -50,6 +50,9 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <segue destination="nbk-pT-0MI" kind="show" id="IhV-Xw-gt8"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -60,7 +63,6 @@
                     <navigationItem key="navigationItem" title="Tasks List" id="fbi-2R-TAc"/>
                     <connections>
                         <outlet property="segmentedControl" destination="PqC-MB-GX7" id="nde-tS-sdc"/>
-                        <segue destination="nbk-pT-0MI" kind="show" identifier="goTask" id="CLp-Tr-3rq"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9go-Ui-T2z" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
